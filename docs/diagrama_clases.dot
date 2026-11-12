@@ -1,0 +1,92 @@
+digraph G {
+  graph [rankdir=LR, fontname="Liberation Sans", fontsize=12, nodesep=0.14, ranksep=0.75, compound=true, pad=0.2, splines=polyline];
+  node [fontname="Liberation Sans", fontsize=10];
+  edge [fontname="Liberation Sans", fontsize=9, color="#34495E"];
+  Main [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#FFFFFF"><B>Main</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+main(String[]): void<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  subgraph cluster_fa { label="Patrón FACADE"; style="filled,rounded"; fillcolor="#FFF6C2"; color="#B7950B"; fontsize=12; fontname="Liberation Sans";
+  Servicio [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#FFF0A0"><B>ServicioAnalitica</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">-repo: RepoAnalitica<BR ALIGN="LEFT"/>-metricas: List&lt;Metrica&gt;<BR ALIGN="LEFT"/>-fabrica: FabricaFuentes<BR ALIGN="LEFT"/></FONT></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+cargar(): InformeCarga<BR ALIGN="LEFT"/>+resumen(desde, hasta): List&lt;ResultadoMetrica&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  nFa [shape=note, style=filled, fillcolor="#FFFBDF", color="#7F8C8D", fontname="Liberation Sans", fontsize=10, label=<FACADE: única puerta de entrada.<BR ALIGN="LEFT"/>Solo 2 métodos públicos; repo y métricas<BR ALIGN="LEFT"/>se inyectan por el constructor (DIP).<BR ALIGN="LEFT"/>>];
+  {rank=same; nFa; Servicio;}
+  }
+  subgraph cluster_ad { label="Patrones ADAPTER + FACTORY  (paquete fuentes)"; style="filled,rounded"; fillcolor="#DCEBF8"; color="#2E86C1"; fontsize=12; fontname="Liberation Sans";
+  Fabrica [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#BFD9F0"><B>FabricaFuentes</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">-registro: Map&lt;String, Function&lt;Path, FuenteDatos&lt;?&gt;&gt;&gt;<BR ALIGN="LEFT"/></FONT></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+registrar(tipo, constructor): void<BR ALIGN="LEFT"/>+crear(ConfigFuente): FuenteDatos&lt;?&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  Config [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#BFD9F0"><FONT POINT-SIZE="9">«record»</FONT><BR/><B>ConfigFuente</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">tipo: String<BR ALIGN="LEFT"/>ruta: String<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  FuenteDatos [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#9CC4E8"><FONT POINT-SIZE="9">«interface»</FONT><BR/><B><I>FuenteDatos&lt;T&gt;</I></B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+leer(): List&lt;T&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  AdApp [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#E8F2FB"><B>AppPedidosJsonAdapter</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+leer(): List&lt;LineaPedido&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  AdPas [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#E8F2FB"><B>PasarelaCsvAdapter</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+leer(): List&lt;Pago&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  AdMenu [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#E8F2FB"><B>MenuCsvAdapter</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+leer(): List&lt;Plato&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  nAd [shape=note, style=filled, fillcolor="#F3F9FE", color="#7F8C8D", fontname="Liberation Sans", fontsize=10, label=<ADAPTER: cada archivo (JSON, CSV con ;, CSV con ,)<BR ALIGN="LEFT"/>se traduce al modelo (LineaPedido, Pago, Plato)<BR ALIGN="LEFT"/>detrás de FuenteDatos&lt;T&gt;.<BR ALIGN="LEFT"/>FACTORY: FabricaFuentes elige el adaptador<BR ALIGN="LEFT"/>según &quot;tipo&quot; de fuentes.json, sin if/else.<BR ALIGN="LEFT"/>>];
+  {rank=same; nAd; Fabrica;}
+  }
+  subgraph cluster_pi { label="Patrón PIPELINE (Pipes & Filters)  (paquete pipeline)"; style="filled,rounded"; fillcolor="#DDF2DD"; color="#27AE60"; fontsize=12; fontname="Liberation Sans";
+  Pipeline [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#BDE5BD"><B>Pipeline</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">-filtros: List&lt;Filtro&gt;<BR ALIGN="LEFT"/></FONT></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+ejecutar(List&lt;LineaPedido&gt;): ResultadoPipeline<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  Filtro [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#9ED89E"><FONT POINT-SIZE="9">«interface»</FONT><BR/><B><I>Filtro</I></B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+nombre(): String<BR ALIGN="LEFT"/>+aplicar(List&lt;LineaPedido&gt;): List&lt;LineaPedido&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  F0 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#EAF7EA"><B>SinPedidosRepetidos</B></TD></TR></TABLE>>];
+  F1 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#EAF7EA"><B>CantidadValida</B></TD></TR></TABLE>>];
+  F2 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#EAF7EA"><B>SoloPagados</B></TD></TR></TABLE>>];
+  F3 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#EAF7EA"><B>PagoAprobadoYMontoIgual</B></TD></TR></TABLE>>];
+  F4 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#EAF7EA"><B>CompletarNombrePlato</B></TD></TR></TABLE>>];
+  nPi [shape=note, style=filled, fillcolor="#F4FBF4", color="#7F8C8D", fontname="Liberation Sans", fontsize=10, label=<PIPELINE: cada Filtro aplica UNA regla;<BR ALIGN="LEFT"/>Pipeline los ejecuta en orden e informa<BR ALIGN="LEFT"/>cuántas líneas descartó cada uno.<BR ALIGN="LEFT"/>>];
+  {rank=same; nPi; Pipeline;}
+  }
+  subgraph cluster_st { label="Patrón STRATEGY  (paquete metricas)"; style="filled,rounded"; fillcolor="#FDE9CF"; color="#E67E22"; fontsize=12; fontname="Liberation Sans";
+  Metrica [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#F9CD94"><FONT POINT-SIZE="9">«interface»</FONT><BR/><B><I>Metrica</I></B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+nombre(): String<BR ALIGN="LEFT"/>+calcular(DatosAnalisis): ResultadoMetrica<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  M0 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#FEF4E6"><B>PlatosTop</B></TD></TR></TABLE>>];
+  M1 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#FEF4E6"><B>PedidosPorHora</B></TD></TR></TABLE>>];
+  M2 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#FEF4E6"><B>TicketPromedio</B></TD></TR></TABLE>>];
+  M3 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#FEF4E6"><B>TiempoPreparacion</B></TD></TR></TABLE>>];
+  M4 [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#FEF4E6"><B>PagosRechazados</B></TD></TR></TABLE>>];
+  Datos [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#FBDDB5"><FONT POINT-SIZE="9">«record»</FONT><BR/><B>DatosAnalisis</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">lineas: List&lt;LineaPedido&gt;<BR ALIGN="LEFT"/>pagos: List&lt;Pago&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  nSt [shape=note, style=filled, fillcolor="#FFF8EE", color="#7F8C8D", fontname="Liberation Sans", fontsize=10, label=<STRATEGY: cada Metrica es un algoritmo<BR ALIGN="LEFT"/>intercambiable. Agregar una métrica<BR ALIGN="LEFT"/>= crear una clase nueva.<BR ALIGN="LEFT"/>>];
+  {rank=same; nSt; Metrica;}
+  }
+  subgraph cluster_re { label="Patrón REPOSITORY  (paquete repositorio)"; style="filled,rounded"; fillcolor="#EBDDF3"; color="#8E44AD"; fontsize=12; fontname="Liberation Sans";
+  Repo [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#D5B8E6"><FONT POINT-SIZE="9">«interface»</FONT><BR/><B><I>RepoAnalitica</I></B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">+guardarLineas(List&lt;LineaPedido&gt;): void<BR ALIGN="LEFT"/>+guardarPagos(List&lt;Pago&gt;): void<BR ALIGN="LEFT"/>+lineasEntre(desde, hasta): List&lt;LineaPedido&gt;<BR ALIGN="LEFT"/>+pagosEntre(desde, hasta): List&lt;Pago&gt;<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  RepoMem [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#F4EAF9"><B>RepoAnaliticaMemoria</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">-lineas: List&lt;LineaPedido&gt;<BR ALIGN="LEFT"/>-pagos: List&lt;Pago&gt;<BR ALIGN="LEFT"/></FONT></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">(implementa los 4 métodos)<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  nRe [shape=note, style=filled, fillcolor="#FAF4FD", color="#7F8C8D", fontname="Liberation Sans", fontsize=10, label=<REPOSITORY: las métricas piden datos<BR ALIGN="LEFT"/>por rango de fechas sin saber dónde<BR ALIGN="LEFT"/>se guardan (hoy: memoria).<BR ALIGN="LEFT"/>>];
+  {rank=same; nRe; Repo;}
+  }
+  subgraph cluster_mo { label="Modelo (records)  (paquete modelo)"; style="filled,rounded"; fillcolor="#EEEEEE"; color="#7F8C8D"; fontsize=12; fontname="Liberation Sans";
+  Linea [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#DDDDDD"><FONT POINT-SIZE="9">«record»</FONT><BR/><B>LineaPedido</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">numeroPedido, platoId, nombrePlato<BR ALIGN="LEFT"/>cantidad, precioUnitario, totalPedido<BR ALIGN="LEFT"/>registradoEn, pagadoEn, listoRetiroEn<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  Pago [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#DDDDDD"><FONT POINT-SIZE="9">«record»</FONT><BR/><B>Pago</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">referencia, monto, estado: EstadoPago<BR ALIGN="LEFT"/>motivoRechazo, fechaHora<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  Plato [shape=plain, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" COLOR="#34495E"><TR><TD ALIGN="CENTER" BGCOLOR="#DDDDDD"><FONT POINT-SIZE="9">«record»</FONT><BR/><B>Plato</B></TD></TR><TR><TD ALIGN="LEFT" BGCOLOR="white"><FONT POINT-SIZE="9">id, nombre, categoria<BR ALIGN="LEFT"/>precioActual, estado: EstadoPlato<BR ALIGN="LEFT"/></FONT></TD></TR></TABLE>>];
+  }
+  // Main -> Facade
+  Main -> Servicio [arrowhead=vee, style=dashed];
+  // Facade -> piezas (asociación / dependencia)
+  Servicio -> Fabrica [arrowhead=vee, style=dashed, label="usa"];
+  Servicio -> Pipeline [arrowhead=vee, style=dashed, label="crea y usa"];
+  Servicio -> Metrica [arrowhead=vee, label="metricas  1..*"];
+  Servicio -> Repo [arrowhead=vee, label="repo"];
+  // Adapter / Factory
+  Fabrica -> FuenteDatos [arrowhead=vee, style=dashed, label="crea"];
+  Fabrica -> Config [arrowhead=vee, style=dashed];
+  FuenteDatos -> AdApp [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  FuenteDatos -> AdPas [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  FuenteDatos -> AdMenu [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  // Pipeline
+  Pipeline -> Filtro [arrowhead=odiamond, dir=back, label="filtros  0..*", arrowtail=odiamond, arrowhead=none];
+  Filtro -> F0 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Filtro -> F1 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Filtro -> F2 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Filtro -> F3 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Filtro -> F4 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  F3 -> Pago [arrowhead=vee, style=dashed, label="usa"];
+  F4 -> Plato [arrowhead=vee, style=dashed, label="usa"];
+  Filtro -> Linea [arrowhead=vee, style=dashed];
+  // Strategy
+  Metrica -> M0 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Metrica -> M1 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Metrica -> M2 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Metrica -> M3 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Metrica -> M4 [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  Metrica -> Datos [arrowhead=vee, style=dashed, label="recibe"];
+  // Repository
+  Repo -> RepoMem [arrowhead=none, arrowtail=empty, dir=back, style=dashed];
+  // Notas
+  nFa -> Servicio [arrowhead=none, style=dotted, color="#7F8C8D", constraint=false];
+  nAd -> Fabrica [arrowhead=none, style=dotted, color="#7F8C8D", constraint=false];
+  nPi -> Pipeline [arrowhead=none, style=dotted, color="#7F8C8D", constraint=false];
+  nSt -> Metrica [arrowhead=none, style=dotted, color="#7F8C8D", constraint=false];
+  nRe -> Repo [arrowhead=none, style=dotted, color="#7F8C8D", constraint=false];
+}
