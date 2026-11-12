@@ -1,0 +1,27 @@
+=== CampusEats ====
+Leido: 633 lineas de pedido, 443 pagos, 12 platos
+
+--- Limpieza de los datos ---
+Pedidos repetidos                             2
+Cantidad igual a cero                         1
+Pedidos que no fueron pagados                 35
+Pago no aprobado o monto distinto al total    2
+Completar nombre del plato (men├║)             0
+Quedan al final: 593 lineas de 388 pedidos
+
+--- Estadisticas (del 19 al 30 de octubre) ---
+[Platos mas vendidos]
+  1. Almuerzo ejecutivo, 138 unidades
+  2. Jugo natural, 116 unidades
+  3. Caf├® pasado, 114 unidades
+  4. Seco de pollo, 93 unidades
+  5. Batido de mora, 73 unidades
+[Pedidos por hora]
+  La hora pico es las 13:00, con 71 pedidos.
+  Le siguen las 10:00 (63) y las 12:00 (59)
+[Ticket promedio]
+  4,94 dolares por pedido (388 pedidos)
+[Tiempo de preparacion]
+  Entre las 12:00 y las 13:59: 20,2 minutos (130 pedidos)
+  Resto del dia: 12,5 minutos (257 pedidos)
+[Pagos rechazados]
